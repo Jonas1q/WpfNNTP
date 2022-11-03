@@ -19,8 +19,6 @@ using System.Windows.Shapes;
 namespace Wpfnntp
 {
     
-
-    
     public partial class MainWindow : Window
     {
         String serverName = "news.sunsite.dk";
@@ -34,118 +32,129 @@ namespace Wpfnntp
         private TcpClient socket;
         private NetworkStream ns;
         public MainWindow()
-        {
-
-            InitializeComponent();
-            socket = new TcpClient(serverName, serverPort);
-            ns = socket.GetStream();
-            sr = new StreamReader(ns, Encoding.Default);
-            sw = new StreamWriter(ns);
-            reader = new StreamReader(ns, Encoding.UTF8);
-        }
-
-
-
-        void LoginBtn_Click(object sender, RoutedEventArgs e)
-        {
-            String serverName = "news.sunsite.dk";
-            int serverPort = 119;
-
-            string username = BoxUser.Text;
-            string password = PasswordBox.Password;
-
-            // Convert an input String to bytes  
-
-            byte[] sendMessage = Encoding.UTF8.GetBytes("Hello Server, how are you today?\n");
-
-
-            TcpClient socket = null;
-            NetworkStream ns = null;
-            StreamReader reader = null;
-
-            try
             {
-                // (1) Create the socket that is connected to server on specified port  
+
+                InitializeComponent();
+
                 socket = new TcpClient(serverName, serverPort);
-                Thread.Sleep(100);
                 ns = socket.GetStream();
-                Console.WriteLine("Connected to server, the stream is ready");
+                sr = new StreamReader(ns, Encoding.Default);
+                sw = new StreamWriter(ns);
+                reader = new StreamReader(ns, Encoding.UTF8);
+            }
 
 
 
+            void LoginBtn_Click(object sender, RoutedEventArgs e)
+            {
+                String serverName = "news.sunsite.dk";
+                int serverPort = 119;
 
-                // a) Write to the server 
-                ns.Write(sendMessage, 0, sendMessage.Length);
-                Thread.Sleep(100);
-                Console.WriteLine("Sent {0} bytes to server...", sendMessage.Length);
+                string username = BoxUser.Text;
+                string password = PasswordBox.Password;
 
-                ns.Flush();
+                // Convert an input String to bytes  
 
-                // b) Read from the server
-                String? recieveMessage = reader.ReadLine();
-                Console.WriteLine("Got this message {0} back from the server", recieveMessage);
-                Thread.Sleep(100);
-
-
-                StreamReader sr = new StreamReader(ns, Encoding.Default);
-                StreamWriter sw = new StreamWriter(ns);
-                sw.AutoFlush = true;
+                byte[] sendMessage = Encoding.UTF8.GetBytes("Hello Server, how are you today?\n");
 
 
-                Thread.Sleep(100);
-                sw.WriteLine($"authinfo user {username}");
-                Thread.Sleep(100);
-                string response = sr.ReadLine();
-                Console.WriteLine(response);
+                TcpClient socket = null;
+                NetworkStream ns = null;
+                StreamReader reader = null;
 
-                if (response == "500 What?")
+                try
                 {
+                    // (1) Create the socket that is connected to server on specified port  
+                    socket = new TcpClient(serverName, serverPort);
+                    Thread.Sleep(100);
+                    ns = socket.GetStream();
+                    Console.WriteLine("Connected to server, the stream is ready");
+
+
+
+
+                    // a) Write to the server 
+                    ns.Write(sendMessage, 0, sendMessage.Length);
+                    Thread.Sleep(100);
+                    Console.WriteLine("Sent {0} bytes to server...", sendMessage.Length);
+
+                    ns.Flush();
+
+                    // b) Read from the server
+
+                    reader = new StreamReader(ns, Encoding.UTF8);
+                    String? recieveMessage = reader.ReadLine();
+                    Console.WriteLine("Got this message {0} back from the server", recieveMessage);
+                    Thread.Sleep(100);
+
+
+                    StreamReader sr = new StreamReader(ns, Encoding.Default);
+                    StreamWriter sw = new StreamWriter(ns);
+                    sw.AutoFlush = true;
+
+
+                    Thread.Sleep(100);
                     sw.WriteLine($"authinfo user {username}");
-                    response = sr.ReadLine();
-                }
-
-                if (response == "381 PASS required")
-                {
-                    sw.WriteLine($"authinfo pass {password}");
-                    response = sr.ReadLine();
+                    Thread.Sleep(100);
+                    string response = sr.ReadLine();
                     Console.WriteLine(response);
-                    sw.WriteLine($"authinfo pass {password}");
-                    response = sr.ReadLine(); // Retrieve Response
+
+                    if (response == "500 What?")
+                    {
+                        sw.WriteLine($"authinfo user {username}");
+                        response = sr.ReadLine();
+                    }
+
+                    if (response == "381 PASS required")
+                    {
+                        sw.WriteLine($"authinfo pass {password}");
+                        response = sr.ReadLine();
+                        Console.WriteLine(response);
+                        sw.WriteLine($"authinfo pass {password}");
+                        response = sr.ReadLine(); // Retrieve Response
 
 
+                    }
+
+                    if (response == "281 Ok")
+                    {
+                        MessageBox.Show("Connected with no problems");
+                        Listbtn.IsEnabled = true;
+                    }
                 }
-
-                if (response == "281 Ok")
+                catch (Exception err)
                 {
-                    MessageBox.Show("Connected with no problems");
-                    Listbtn.IsEnabled = true;
+                    Console.WriteLine(err.Message);
+                }
+
+                finally
+                {
+                    ns.Close();
+                    reader.Close();
+                    socket.Close();
                 }
             }
-            catch (Exception err)
+
+            void Listbtn_Click(object sender, RoutedEventArgs e)
             {
-                Console.WriteLine(err.Message);
+
+
+                sw.WriteLine("list");
+                {
+                    response = sr.ReadLine();
+                    OutputBox.Text += response;
+                }
+
+
+
             }
 
-            finally
-            {
-                ns.Close();
-                reader.Close();
-                socket.Close();
-            }
-        }
 
-        void Listbtn_Click(object sender, RoutedEventArgs e)
-        {
-            
-            sw.WriteLine("list");
-            {
-                response = sr.ReadLine();
-                OutputBox.Text += response;
-            }
+
+
         }
     }
 
 
-}
     
 
