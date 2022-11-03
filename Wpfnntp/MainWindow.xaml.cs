@@ -132,16 +132,11 @@ namespace Wpfnntp
 
             void Listbtn_Click(object sender, RoutedEventArgs e)
             {
-
-
                 sw.WriteLine("list");
                 {
                     response = sr.ReadLine();
                     OutputBox.Text += response;
                 }
-
-
-
             }
 
         private void QuitBtn_Click(object sender, RoutedEventArgs e)
