@@ -127,12 +127,7 @@ namespace Wpfnntp
                     Console.WriteLine(err.Message);
                 }
 
-                finally
-                {
-                    ns.Close();
-                    reader.Close();
-                    socket.Close();
-                }
+                
             }
 
             void Listbtn_Click(object sender, RoutedEventArgs e)
@@ -149,10 +144,14 @@ namespace Wpfnntp
 
             }
 
-
-
-
+        private void QuitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            sw.WriteLine("quit");
+            ns.Close();
+            reader.Close();
+            socket.Close();
         }
+    }
     }
 
 
