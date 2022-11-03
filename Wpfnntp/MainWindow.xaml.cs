@@ -133,6 +133,8 @@ namespace Wpfnntp
             void Listbtn_Click(object sender, RoutedEventArgs e)
             {
                 sw.WriteLine("list");
+
+                while(sr.ReadLine() != ".")
                 {
                     response = sr.ReadLine();
                     OutputBox.Text += response;
