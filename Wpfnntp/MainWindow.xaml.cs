@@ -44,59 +44,41 @@ namespace Wpfnntp
             }
 
 
+        void EstablishConnection(string serverName, int serverPort)
+        {
+            this.serverName = serverName;
+            this.serverPort = serverPort;
+            socket = new TcpClient(serverName, serverPort);
+            ns = socket.GetStream();
+        }
+
+
 
             void LoginBtn_Click(object sender, RoutedEventArgs e)
             {
-                String serverName = "news.sunsite.dk";
-                int serverPort = 119;
+               
 
                 string username = BoxUser.Text;
                 string password = PasswordBox.Password;
 
-                // Convert an input String to bytes  
-
-                byte[] sendMessage = Encoding.UTF8.GetBytes("Hello Server, how are you today?\n");
-
-
-                TcpClient socket = null;
-                NetworkStream ns = null;
-                StreamReader reader = null;
 
                 try
                 {
+                    EstablishConnection(this.serverName, this.serverPort);
                     // (1) Create the socket that is connected to server on specified port  
-                    socket = new TcpClient(serverName, serverPort);
-                    Thread.Sleep(100);
-                    ns = socket.GetStream();
-                    Console.WriteLine("Connected to server, the stream is ready");
-
-
-
-
-                    // a) Write to the server 
-                    ns.Write(sendMessage, 0, sendMessage.Length);
-                    Thread.Sleep(100);
-                    Console.WriteLine("Sent {0} bytes to server...", sendMessage.Length);
-
-                    ns.Flush();
-
-                    // b) Read from the server
-
                     reader = new StreamReader(ns, Encoding.UTF8);
-                    String? recieveMessage = reader.ReadLine();
-                    Console.WriteLine("Got this message {0} back from the server", recieveMessage);
-                    Thread.Sleep(100);
+                    //Thread.Sleep(100);
 
-
-                    StreamReader sr = new StreamReader(ns, Encoding.Default);
-                    StreamWriter sw = new StreamWriter(ns);
                     sw.AutoFlush = true;
 
 
                     Thread.Sleep(100);
                     sw.WriteLine($"authinfo user {username}");
                     Thread.Sleep(100);
-                    string response = sr.ReadLine();
+                    response = sr.ReadLine();
+                    Console.WriteLine(response);
+                    sw.WriteLine($"authinfo user {username}");
+                    response = sr.ReadLine();
                     Console.WriteLine(response);
 
                     if (response == "500 What?")
@@ -112,14 +94,13 @@ namespace Wpfnntp
                         Console.WriteLine(response);
                         sw.WriteLine($"authinfo pass {password}");
                         response = sr.ReadLine(); // Retrieve Response
-
-
                     }
 
                     if (response == "281 Ok")
                     {
                         MessageBox.Show("Connected with no problems");
                         Listbtn.IsEnabled = true;
+
                     }
                 }
                 catch (Exception err)
@@ -132,12 +113,12 @@ namespace Wpfnntp
 
             void Listbtn_Click(object sender, RoutedEventArgs e)
             {
+                sw.AutoFlush = true;
                 sw.WriteLine("list");
-
-                while(sr.ReadLine() != ".")
+                while (sr.ReadLine() != ".")
                 {
-                    response = sr.ReadLine();
-                    OutputBox.Text += response;
+                response = sr.ReadLine();
+                Console.WriteLine(response);
                 }
             }
 
